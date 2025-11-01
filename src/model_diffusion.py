@@ -131,7 +131,6 @@ class UNet(nn.Module):
         
         # 下采样路径
         self.down_blocks = nn.ModuleList()
-        self.down_samples = nn.ModuleList()
         
         channels = [base_channels]
         now_channels = base_channels
@@ -147,7 +146,7 @@ class UNet(nn.Module):
                 channels.append(now_channels)
             
             if i != len(channel_mults) - 1:
-                self.down_samples.append(nn.Conv2d(now_channels, now_channels, 3, 2, 1))
+                self.down_blocks.append(nn.Conv2d(now_channels, now_channels, 3, 2, 1))
                 channels.append(now_channels)
         
         # 中间层
@@ -157,7 +156,6 @@ class UNet(nn.Module):
         
         # 上采样路径
         self.up_blocks = nn.ModuleList()
-        self.up_samples = nn.ModuleList()
         
         for i, mult in enumerate(reversed(channel_mults)):
             out_ch = base_channels * mult
@@ -169,7 +167,7 @@ class UNet(nn.Module):
                 now_channels = out_ch
             
             if i != len(channel_mults) - 1:
-                self.up_samples.append(
+                self.up_blocks.append(
                     nn.ConvTranspose2d(now_channels, now_channels, 4, 2, 1)
                 )
         
@@ -201,11 +199,7 @@ class UNet(nn.Module):
         # 下采样
         hs = [h]
         for block in self.down_blocks:
-            h = block(h, t_emb)
-            hs.append(h)
-        
-        for downsample in self.down_samples:
-            h = downsample(h)
+            h = block(h, t_emb) if isinstance(block, ResidualBlock) else block(h)
             hs.append(h)
         
         # 中间层
@@ -214,14 +208,12 @@ class UNet(nn.Module):
         h = self.mid_block2(h, t_emb)
         
         # 上采样
-        for i, block in enumerate(self.up_blocks):
-            h = torch.cat([h, hs.pop()], dim=1)
-            h = block(h, t_emb)
-            
-            if i % (len(self.up_blocks) // len(self.up_samples)) == 0 and i > 0:
-                idx = i // (len(self.up_blocks) // len(self.up_samples)) - 1
-                if idx < len(self.up_samples):
-                    h = self.up_samples[idx](h)
+        for block in self.up_blocks:
+            if isinstance(block, ResidualBlock):
+                h = torch.cat([h, hs.pop()], dim=1)
+                h = block(h, t_emb)
+            else:  # ConvTranspose2d
+                h = block(h)
         
         # 输出
         h = self.out_norm(h)
