@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Data files (optional - uncomment if data is too large)
+# data/samples/*.npz
+
+# Experiments
+experiments/checkpoints/*.pt
+experiments/logs/*.json
+experiments/logs/*.log
+experiments/results/*.png
+experiments/results/*.mp4
+experiments/results/*.gif
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+/tmp/
+
+# Model checkpoints (keep best model only)
+!experiments/checkpoints/best_model.pt
