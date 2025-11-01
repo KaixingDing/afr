@@ -1,0 +1,62 @@
+# 超参数和实验配置
+
+# 数据配置
+data:
+  data_dir: "data/samples"
+  grid_size: 128
+  domain_size: 1.0
+  num_samples: 1000
+  train_ratio: 0.8
+  num_workers: 4
+
+# 模型配置
+model:
+  timesteps: 1000
+  beta_start: 0.0001
+  beta_end: 0.02
+  in_channels: 2
+  base_channels: 64
+  channel_mults: [1, 2, 4, 8]
+  num_res_blocks: 2
+  attention_resolutions: [16, 8]
+
+# 物理损失权重
+physics:
+  lambda_helmholtz: 1.0
+  lambda_energy: 0.5
+  lambda_boundary: 0.3
+
+# 训练配置
+training:
+  batch_size: 8
+  num_epochs: 100
+  learning_rate: 0.0001
+  weight_decay: 0.00001
+  gradient_clip: 1.0
+  
+  # 学习率调度
+  scheduler:
+    type: "cosine"
+    eta_min_ratio: 0.01
+  
+  # 验证和保存
+  val_interval: 5
+  save_interval: 10
+  
+  # 路径
+  checkpoint_dir: "experiments/checkpoints"
+  log_dir: "experiments/logs"
+  result_dir: "experiments/results"
+
+# 评估配置
+evaluation:
+  num_samples: 20
+  num_visualization: 5
+  create_animation: true
+  animation_frames: 50
+
+# 系统配置
+system:
+  seed: 42
+  gpu_id: 0
+  use_amp: false  # 混合精度训练
